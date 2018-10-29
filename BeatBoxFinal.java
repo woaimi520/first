@@ -24,8 +24,8 @@ public class BeatBoxFinal{
 	Sequence sequence;
 	Sequence mySequence=null;
 	Track track;
-	String[] instrumentNames={"1","2","3","4","5","11","12","13",
-	"14","15","21","22","23","24","25",};
+	String[] instrumentNames={"1","2","3","4","5","6","7","8","9","10","11","12","13",
+	"14","15","16"};
 	
 	int[] instruments={35,42,46,38,49,39,50,60,70,72,64,56,56,47,67,63};
 	
