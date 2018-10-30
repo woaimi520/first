@@ -28,20 +28,22 @@ public class MusicServer{
 			
 			Object o2 =null;
 			Object o1=null;
+			System.out.println("线程启动了");
 			try{
-				
+				System.out.println("线程进入try");
+				// 这里会一直等待 线程在socket断开的时候才会结束
 				while((o1=in.readObject())!=null){
-					
+					System.out.println("线程进入循环了");
 					o2=in.readObject();
 					System.out.println("read two objects");
-					
+					tellEveryone(o1,o2);
 				}
-				
+				System.out.println("线程退出循环了");
 			}catch(Exception ex){
 				ex.printStackTrace();
 			}
 			
-			
+			System.out.println("线程结束");
 		}
 	
 		
@@ -72,7 +74,9 @@ public class MusicServer{
 			try{
 				ServerSocket serveSock =new ServerSocket(4242);
 				while(true){
-					Socket clientScoket =serveSock.accept();
+					System.out.println("主线程进入循环了");
+					Socket clientScoket =serveSock.accept();//这里也会阻塞
+					System.out.println("主线程进入循环了 accept");
 					ObjectOutputStream out =new ObjectOutputStream(clientScoket.getOutputStream());
 					clientOutputStream.add(out);
 					Thread t = new Thread(new ClientHandler(clientScoket));
