@@ -29,6 +29,7 @@ public class BeatBoxFinal{
 	
 	int[] instruments={35,42,46,38,49,39,50,60,70,72,64,56,56,47,67,63};
 	
+	
 	public static void main (String[] args){
 		String temp = "renyu";
 		if(args.length>0){
@@ -39,6 +40,7 @@ public class BeatBoxFinal{
 	}
 	
 	public void startUp(String arg){
+
 		String userName = arg;
 		Boolean connected = false;
 		try{
@@ -96,33 +98,80 @@ public class BeatBoxFinal{
 		
 	}
 	
+	public void writeFile(){
+		try{
+		FileOutputStream fileStream =new FileOutputStream("MyGame.ser");
+		ObjectOutputStream os= new ObjectOutputStream(fileStream);
+		os.writeObject(ListVector);  //保存 ListVector 显示的内容的保存
+		os.close();
+		}catch(Exception e){}
+		
+	}
+	public void readFile(){
+		try{
+		FileInputStream fileStream =new FileInputStream("MyGame.ser");
+		ObjectInputStream oi= new ObjectInputStream(fileStream);
+		ListVector=(Vector)oi.readObject();  //保存 ListVector 显示的内容的保存
+		oi.close();
+			}catch(Exception e){}
+	}
+	
 			public void buildGUI(){
-			theFrame = new JFrame("Cyber BeatBox");
-			BorderLayout layout = new BorderLayout();
-			JPanel background = new JPanel(layout);
-			background.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+			theFrame = new JFrame("任大侠2 BeatBox");//边框
+		
+			theFrame.addWindowListener(new WindowAdapter(){
+				
+				public void windowOpened(WindowEvent e){
+					System.out.println("windowOpened");
+					//ListVector  list 显示的内容的保存
+				    readFile();
+					System.out.println("readFile");
+					
+					
+				}
+				
+				public void windowClosing(WindowEvent e){
+					System.out.println("dispose");
+					theFrame.dispose();
+				}
+				public void windowClosed(WindowEvent e){
+				
+					writeFile();
+				    System.out.println("writeFile");
+					System.out.println("system exit");
+					System.exit(0);
+				}
+			});
+				
+		
+			
+			BorderLayout layout = new BorderLayout();//border NWSE 
+			JPanel background = new JPanel(layout);//嵌板 改变布局
+			background.setBorder(BorderFactory.createEmptyBorder(10,200,300,400));//设置panel的边框的
+			background.setBackground(Color.BLUE);
 			
 			checkBoxList= new ArrayList<JCheckBox>();
 			
-			Box buttonBox=	new Box(BoxLayout.Y_AXIS);
+			Box buttonBox=	new Box(BoxLayout.Y_AXIS);//从上到下垂直
+			
 			JButton start = new JButton("Start");
 			start.addActionListener(new MyStartListener());
 			buttonBox.add(start);
 			
 			JButton stop = new JButton("Stop");
-			start.addActionListener(new MyStopListener());
+			stop.addActionListener(new MyStopListener());
 			buttonBox.add(stop);
 			
 			JButton upTempo = new JButton("Tempo up");
-			start.addActionListener(new MyUpTempoListener());
+			upTempo.addActionListener(new MyUpTempoListener());
 			buttonBox.add(upTempo);
 			
 			JButton downTempo = new JButton("Tempo down");
-			start.addActionListener(new MyDownTempoListener());
+			downTempo.addActionListener(new MyDownTempoListener());
 			buttonBox.add(downTempo);
 			
 			JButton sendIt = new JButton("sendIt");
-			start.addActionListener(new MySendListener());
+			sendIt.addActionListener(new MySendListener());
 			buttonBox.add(sendIt);
 			
 			userMessage = new JTextField();
@@ -130,26 +179,27 @@ public class BeatBoxFinal{
 			
 			incominglist = new JList();
 			incominglist.addListSelectionListener(new MyListSelectionListener());
-			incominglist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			incominglist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);//一次只能选择一项
 			JScrollPane theList=new JScrollPane(incominglist);
 			buttonBox.add(theList);
-			incominglist.setListData(ListVector);
+			incominglist.setListData(ListVector);// 设置list 显示的内容来源
+			//box 设置完成 box 装了button message scrol 
 			
 			Box nameBox=new Box(BoxLayout.Y_AXIS);
 			for(int i=0;i<16;i++){
 				nameBox.add(new Label(instrumentNames[i]));
 				
 			}
+				//box 设置完成 box 装了label
+			background.add(BorderLayout.EAST,buttonBox);//东
+			background.add(BorderLayout.WEST,nameBox);//西
 			
-			background.add(BorderLayout.EAST,buttonBox);
-			background.add(BorderLayout.WEST,nameBox);
-			
-			theFrame.getContentPane().add(background);
-			GridLayout grid =new GridLayout(16,16);
-   			grid.setVgap(1);
-			grid.setVgap(2);
-			mainPanel=new JPanel(grid);
-			background.add(BorderLayout.CENTER,mainPanel);
+			theFrame.getContentPane().add(background);//frame 大脚盆 pane 脚盆底  panel 盘子 box 盒子 button、label、scrol 水果
+			GridLayout grid =new GridLayout(16,16);//网格布局
+   			grid.setHgap(1);//设置水平间距
+			grid.setVgap(2);//设置垂直间距
+			mainPanel=new JPanel(grid);//先横着
+			background.add(BorderLayout.CENTER,mainPanel);// box panel box 放在大盘子 panel 上
 			
 			for(int i =0;i<256;i++){
 				JCheckBox c= new JCheckBox();
@@ -159,19 +209,19 @@ public class BeatBoxFinal{
 				
 				
 			}
-			theFrame.setBounds(50,50,300,300);
-			theFrame.pack();
+			theFrame.setBounds(5,50,300,300);//x y 长 宽 ，xy 决定脚盆出来的位置
+			theFrame.pack();//满足子布局 选择最合适大小
 			theFrame.setVisible(true);
 			
 		}
 		
 		public void setUpMidi(){
 			try{
-				sequencer=MidiSystem.getSequencer();
-				sequencer.open();
-				sequence = new Sequence(Sequence.PPQ,4);
-				track = sequence.createTrack();
-				sequencer.setTempoInBPM(120); //??
+				sequencer=MidiSystem.getSequencer();//播放器
+				sequencer.open();//打开播放器
+				sequence = new Sequence(Sequence.PPQ,4);//碟片
+				track = sequence.createTrack();//碟片信息
+				sequencer.setTempoInBPM(12); //1分钟120次
 			}catch(Exception e){
 				
 				e.printStackTrace();
@@ -184,6 +234,7 @@ public class BeatBoxFinal{
 			
 			public void actionPerformed(ActionEvent a){
  				
+				System.out.println("sequancer start ");
 				buildTrackAndStart();
 				
 			}
@@ -196,7 +247,8 @@ public class BeatBoxFinal{
 			
 			public void actionPerformed(ActionEvent a){
  				
-			sequencer.stop();
+			System.out.println("sequencer.stop");	
+			sequencer.stop();//播放器关闭
 				
 			}
 			
@@ -209,7 +261,7 @@ public class BeatBoxFinal{
 			public void actionPerformed(ActionEvent a){
  				
 				float tempoFactor = sequencer.getTempoFactor();
-				sequencer.setTempoFactor((float)(tempoFactor *1.03));
+				sequencer.setTempoFactor((float)(tempoFactor *1.03));//加快播放速度 减小播放速度
 				
 			}
 			
@@ -295,7 +347,7 @@ public class BeatBoxFinal{
 		  public void buildTrackAndStart(){
 			  
 			  ArrayList<Integer> trackList =null;
-			  sequence.deleteTrack(track);
+			  sequence.deleteTrack(track);//磁带清空
 			  track = sequence.createTrack();
 			  for(int i = 0;i<16;i++){
 				  
@@ -305,13 +357,13 @@ public class BeatBoxFinal{
 					   if(jc.isSelected()){
 						   
 						   int key=instruments[i];
-						   trackList.add(new Integer(key));
+						   trackList.add(new Integer(key));//记录下哪些checkbox被点击
 					   }else{
 						   trackList.add(null);
 					   }
 					  
 				  }
-				  makeTracks(trackList);
+				  makeTracks(trackList);//一次处理一行
 			  }
 			  track.add(makeEvent(192,9,1,0,15));
 			  try{
@@ -343,7 +395,7 @@ public class BeatBoxFinal{
 			  try{
 				  ShortMessage a =new ShortMessage();
 				  a.setMessage(comd,chan,one,two);
-				  event = new MidiEvent(a,tick);
+				  event = new MidiEvent(a,tick);//shortmessage 转化为midi信息
 			  }catch(Exception e){
 				 
 			  }
